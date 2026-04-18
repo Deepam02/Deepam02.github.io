@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepam — Component Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F7F2EA;--ink:#18130F;--rust:#BF4A2B;--rust-light:#D46140;--sand:#E6DDD0;--warm-mid:#EDE6D8;--sage:#7A9178;--gold:#C9A84C;--ink40:rgba(24,19,15,0.4);--ink15:rgba(24,19,15,0.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:#1a1512;font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none;}
+#cur-dot{width:8px;height:8px;border-radius:50%;background:var(--rust);position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;}
+#cur-ring{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(191,74,43,.5);position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:border-color .3s;}
+body:has(a:hover) #cur-dot,body:has(button:hover) #cur-dot{width:20px;height:20px;background:rgba(191,74,43,.35);}
+body:has(a:hover) #cur-ring,body:has(button:hover) #cur-ring{border-color:rgba(191,74,43,.25);width:50px;height:50px;}
+#spotlight{position:fixed;inset:0;pointer-events:none;z-index:8998;background:radial-gradient(550px circle at var(--mx,50%) var(--my,50%),rgba(191,74,43,.065) 0%,transparent 70%);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9997;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");}
+.sdiv{text-align:center;padding:48px 32px 24px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(247,242,234,.15);border-top:1px solid rgba(247,242,234,.06);margin-top:100px;}
+.sdiv strong{color:var(--rust);}
+@keyframes riseIn{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+@keyframes sonar{0%{box-shadow:0 0 0 0 rgba(122,145,120,.6);}70%{box-shadow:0 0 0 10px rgba(122,145,120,0);}100%{box-shadow:0 0 0 0 rgba(122,145,120,0);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes scanLine{0%{left:-100%;}100%{left:100%;}}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ── NAV ── */
+#nav-bar{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;backdrop-filter:blur(14px);background:rgba(26,21,18,.88);border-bottom:1px solid rgba(247,242,234,.06);transition:padding .4s;}
+#nav-bar.scrolled{padding:12px 48px;}
+.nlogo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--cream);text-decoration:none;}
+.nlogo em{font-style:italic;color:var(--rust);}
+.nlinks{display:flex;align-items:center;gap:24px;}
+.nlink{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,242,234,.3);text-decoration:none;transition:color .25s;}
+.nlink:hover{color:var(--cream);}
+.ncta{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);background:var(--rust);padding:9px 18px;text-decoration:none;border-radius:2px;transition:background .25s;}
+.ncta:hover{background:var(--rust-light);}
+
+/* ── SHARED BUTTONS ── */
+.btn-ink{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);background:var(--ink);padding:15px 30px;text-decoration:none;border-radius:2px;display:inline-flex;align-items:center;gap:10px;transition:background .25s,transform .2s;}
+.btn-ink:hover{background:var(--rust);transform:translateY(-2px);}
+.btn-cream{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--cream);padding:15px 30px;text-decoration:none;border-radius:2px;display:inline-flex;align-items:center;gap:10px;transition:background .25s,color .25s,transform .2s;}
+.btn-cream:hover{background:var(--rust);color:var(--cream);transform:translateY(-2px);}
+.btn-ghost-lk{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(24,19,15,.4);text-decoration:none;position:relative;transition:color .25s;}
+.btn-ghost-lk::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--rust);transition:width .3s cubic-bezier(.22,1,.36,1);}
+.btn-ghost-lk:hover{color:var(--rust);}
+.btn-ghost-lk:hover::after{width:100%;}
+.btn-ghost-dk{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,242,234,.35);text-decoration:none;position:relative;transition:color .25s;}
+.btn-ghost-dk::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--rust);transition:width .3s cubic-bezier(.22,1,.36,1);}
+.btn-ghost-dk:hover{color:var(--cream);}
+.btn-ghost-dk:hover::after{width:100%;}
+.slabel{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--rust);margin-bottom:12px;}
+.stitle-lk{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,5vw,58px);line-height:1.02;letter-spacing:-.02em;color:var(--ink);}
+.stitle-lk em{font-style:italic;}
+.stitle-dk{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,5vw,58px);line-height:1.02;letter-spacing:-.02em;color:var(--cream);}
+.stitle-dk em{font-style:italic;}
+
+/* ══════════════════════
+   HERO A — V1 REMIX + TERMINAL
+   ══════════════════════ */
+#heroA{min-height:100vh;background:var(--cream);padding:128px 64px 80px;position:relative;overflow:hidden;display:grid;grid-template-columns:1fr 400px;gap:0;align-items:center;}
+#heroA::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 79px,#E6DDD0 79px,#E6DDD0 80px);opacity:.5;pointer-events:none;}
+#heroA .gnum{position:absolute;right:-20px;top:20px;font-family:'Cormorant Garamond',serif;font-size:30vw;line-height:.8;color:var(--sand);user-select:none;pointer-events:none;opacity:.4;letter-spacing:-.04em;}
+#heroA .mcol{position:relative;z-index:2;color:var(--ink);}
+.eyerow{display:flex;align-items:center;gap:14px;margin-bottom:44px;animation:riseIn .8s cubic-bezier(.22,1,.36,1) .1s both;}
+.lbadge{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--sage);animation:sonar 2.2s ease-out infinite;flex-shrink:0;}
+#heroA h1{font-family:'Instrument Serif',serif;font-size:clamp(58px,9vw,116px);line-height:.92;letter-spacing:-.025em;animation:riseIn 1s cubic-bezier(.22,1,.36,1) .25s both;color:var(--ink);margin-bottom:38px;}
+#heroA h1 em{color:var(--rust);font-style:italic;}
+#heroA h1 .gw{-webkit-text-stroke:1.5px var(--ink);color:transparent;}
+#heroA .sub{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:300;line-height:1.7;color:rgba(24,19,15,.62);max-width:460px;margin-bottom:38px;animation:riseIn .9s cubic-bezier(.22,1,.36,1) .45s both;}
+#heroA .sub strong{color:var(--ink);font-weight:400;}
+#heroA .acts{display:flex;align-items:center;gap:24px;animation:riseIn .9s cubic-bezier(.22,1,.36,1) .6s both;}
+#heroA .tcol{position:relative;z-index:2;border-left:1px solid var(--sand);padding-left:52px;animation:riseIn .9s cubic-bezier(.22,1,.36,1) .72s both;}
+.mterm{background:#1C1714;border-radius:8px;overflow:hidden;box-shadow:0 28px 70px rgba(24,19,15,.18);}
+.mtbar{background:#2A2320;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.04);}
+.tdot{width:11px;height:11px;border-radius:50%;}
+.mtbody{padding:22px 26px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.9;}
+.tr{display:flex;gap:10px;}
+.tp{color:var(--rust);flex-shrink:0;}
+.tc{color:#E8DDD0;}
+.to{color:rgba(232,221,208,.5);padding-left:18px;}
+.ts{color:var(--sage);padding-left:18px;}
+.tcur{display:inline-block;width:7px;height:13px;background:var(--rust);vertical-align:middle;animation:blink 1.1s step-end infinite;}
+.scroll-a{position:absolute;bottom:34px;left:64px;display:flex;align-items:center;gap:14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(24,19,15,.28);animation:riseIn 1s ease 1.3s both;}
+.sline{width:52px;height:1px;background:rgba(24,19,15,.12);position:relative;overflow:hidden;}
+.sline::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--rust);animation:scanLine 2.4s ease-in-out 1.6s infinite;}
+
+/* ══════════════════════
+   HERO B — DARK MASSIVE
+   ══════════════════════ */
+#heroB{min-height:100vh;background:var(--ink);padding:128px 64px 80px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;}
+#heroB .gbg{position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(247,242,234,.025) 59px,rgba(247,242,234,.025) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(247,242,234,.025) 59px,rgba(247,242,234,.025) 60px);}
+#heroB .eye{display:flex;align-items:center;gap:14px;margin-bottom:52px;animation:riseIn .8s cubic-bezier(.22,1,.36,1) .1s both;}
+#heroB .bldot{width:7px;height:7px;border-radius:50%;background:var(--sage);animation:sonar 2.2s ease-out infinite;}
+#heroB .etxt{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,242,234,.3);}
+#heroB h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(70px,11.5vw,150px);line-height:.88;letter-spacing:-.03em;color:var(--cream);animation:riseIn 1s cubic-bezier(.22,1,.36,1) .25s both;margin-bottom:64px;}
+#heroB h1 em{color:var(--rust);font-style:italic;}
+#heroB h1 .gw{-webkit-text-stroke:1px rgba(247,242,234,.28);color:transparent;}
+#heroB .brow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid rgba(247,242,234,.08);padding-top:40px;animation:riseIn .9s cubic-bezier(.22,1,.36,1) .5s both;}
+#heroB .bc{padding:0 40px 0 0;}
+#heroB .bc:first-child{padding-left:0;}
+#heroB .bnum{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--rust);line-height:1;margin-bottom:8px;}
+#heroB .blbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,242,234,.28);line-height:1.6;}
+#heroB .bacts{display:flex;align-items:center;gap:24px;margin-top:52px;animation:riseIn .9s cubic-bezier(.22,1,.36,1) .65s both;}
+
+/* ══════════════════════
+   HERO C — EDITORIAL ASYMMETRIC
+   ══════════════════════ */
+#heroC{min-height:100vh;background:var(--cream);display:grid;grid-template-columns:52px 1fr;position:relative;overflow:hidden;}
+#heroC .rail{background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 0;}
+#heroC .rtxt{writing-mode:vertical-lr;transform:rotate(180deg);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(247,242,234,.2);}
+#heroC .cmain{padding:100px 64px 60px 56px;display:flex;flex-direction:column;justify-content:center;position:relative;}
+#heroC .cey{display:flex;align-items:center;gap:14px;margin-bottom:36px;animation:riseIn .8s cubic-bezier(.22,1,.36,1) .1s both;}
+#heroC .cldot{width:7px;height:7px;border-radius:50%;background:var(--sage);animation:sonar 2.2s ease-out infinite;}
+#heroC .cltxt{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);}
+#heroC h1{font-family:'Instrument Serif',serif;font-size:clamp(52px,8.5vw,108px);line-height:.9;letter-spacing:-.025em;color:var(--ink);animation:riseIn 1s cubic-bezier(.22,1,.36,1) .25s both;}
+#heroC h1 em{color:var(--rust);}
+#heroC h1 .outl{-webkit-text-stroke:1.5px var(--ink);color:transparent;}
+#heroC .cbody{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:52px;padding-top:36px;border-top:1px solid var(--sand);animation:riseIn .9s cubic-bezier(.22,1,.36,1) .5s both;}
+#heroC .cdesc{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;line-height:1.72;color:rgba(24,19,15,.6);}
+#heroC .cdesc strong{color:var(--ink);font-weight:400;}
+#heroC .cstats{display:flex;flex-direction:column;gap:18px;}
+#heroC .csrow{display:flex;align-items:baseline;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--sand);}
+#heroC .csrow:last-child{border-bottom:none;padding-bottom:0;}
+#heroC .csnum{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--rust);line-height:1;}
+#heroC .cslbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(24,19,15,.38);line-height:1.5;}
+
+/* ══════════════════════
+   TICKER
+   ══════════════════════ */
+.tsec{background:var(--ink);padding:13px 0;overflow:hidden;border-top:1px solid rgba(247,242,234,.04);}
+.ttrack{display:flex;animation:ticker 30s linear infinite;}
+.ttrack:hover{animation-play-state:paused;}
+.titem{display:flex;align-items:center;white-space:nowrap;flex-shrink:0;}
+.tword{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,242,234,.38);padding:0 28px;transition:color .2s;}
+.tword:hover{color:var(--cream);}
+.tsep{color:var(--rust);font-size:14px;opacity:.6;}
+
+/* ══════════════════════
+   PROJ A — ACCORDION
+   ══════════════════════ */
+#projA{padding:120px 64px;background:var(--cream);}
+.ph{margin-bottom:64px;padding-bottom:20px;border-bottom:1px solid var(--sand);}
+.arow{border-bottom:1px solid var(--sand);overflow:hidden;transition:background .28s;}
+.arow:first-of-type{border-top:1px solid var(--sand);}
+.arow:hover{background:rgba(247,242,234,.7);}
+.atrig{width:100%;padding:30px 0;display:grid;grid-template-columns:80px 1fr auto auto;gap:0 28px;align-items:center;cursor:pointer;background:none;border:none;text-align:left;}
+.anum{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:300;color:rgba(24,19,15,.28);}
+.aname{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:300;color:var(--ink);letter-spacing:-.01em;line-height:1.1;}
+.atags{display:flex;gap:8px;}
+.atag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:2px;border:1px solid rgba(191,74,43,.3);color:var(--rust);}
+.aico{width:30px;height:30px;border-radius:50%;border:1px solid var(--sand);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s,border-color .25s;}
+.aico svg{stroke:rgba(24,19,15,.3);transition:transform .35s,stroke .25s;}
+.arow:hover .aico{border-color:var(--rust);}
+.arow:hover .aico svg{stroke:var(--rust);}
+.aico.open{background:var(--rust);border-color:var(--rust);}
+.aico.open svg{stroke:white;transform:rotate(45deg);}
+.abody{max-height:0;overflow:hidden;transition:max-height .55s cubic-bezier(.22,1,.36,1);}
+.abody.open{max-height:460px;}
+.abinn{padding:0 80px 36px;display:grid;grid-template-columns:1fr 360px;gap:56px;}
+.adesc{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;line-height:1.72;color:rgba(24,19,15,.6);margin-bottom:20px;}
+.abulls{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.abulls li{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em;color:rgba(24,19,15,.42);display:flex;align-items:flex-start;gap:9px;line-height:1.6;}
+.abulls li::before{content:'→';color:var(--rust);flex-shrink:0;}
+.aslbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--rust);margin-bottom:14px;}
+.achips{display:flex;flex-wrap:wrap;gap:5px;}
+.achip{font-family:'DM Mono',monospace;font-size:9px;background:var(--warm-mid);border:1px solid var(--sand);padding:3px 9px;border-radius:2px;color:rgba(24,19,15,.48);}
+
+/* ══════════════════════
+   PROJ B — DARK ROWS
+   ══════════════════════ */
+#projB{padding:120px 0;background:var(--ink);}
+.pbh{padding:0 64px 44px;border-bottom:1px solid rgba(247,242,234,.07);margin-bottom:0;}
+.prow{display:grid;grid-template-columns:64px 1fr 1fr;border-bottom:1px solid rgba(247,242,234,.06);transition:background .28s;cursor:pointer;}
+.prow:hover{background:rgba(247,242,234,.026);}
+.prnum{padding:44px 0 44px 64px;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:300;color:rgba(247,242,234,.18);display:flex;align-items:flex-start;}
+.prl{padding:44px 56px 44px 28px;}
+.prtitle{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;line-height:1.1;color:var(--cream);letter-spacing:-.01em;margin-bottom:12px;}
+.prsub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:18px;}
+.prtags{display:flex;gap:7px;flex-wrap:wrap;}
+.prtag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid rgba(191,74,43,.32);color:rgba(191,74,43,.8);}
+.prr{padding:44px 64px 44px 0;display:flex;flex-direction:column;justify-content:space-between;}
+.prdesc{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;line-height:1.7;color:rgba(247,242,234,.48);}
+.prstack{display:flex;flex-wrap:wrap;gap:5px;margin-top:20px;}
+.prchip{font-family:'DM Mono',monospace;font-size:9px;background:rgba(247,242,234,.05);border:1px solid rgba(247,242,234,.09);padding:3px 8px;border-radius:2px;color:rgba(247,242,234,.32);}
+
+/* ══════════════════════
+   PROJ C — H-SCROLL
+   ══════════════════════ */
+#projC{padding:120px 0;background:var(--warm-mid);border-top:1px solid var(--sand);}
+.pch{padding:0 64px;margin-bottom:48px;}
+.pcscroll{display:flex;gap:22px;overflow-x:auto;padding:0 64px 36px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;cursor:grab;}
+.pcscroll:active{cursor:grabbing;}
+.pcscroll::-webkit-scrollbar{height:2px;}
+.pcscroll::-webkit-scrollbar-track{background:var(--sand);}
+.pcscroll::-webkit-scrollbar-thumb{background:var(--rust);}
+.pcc{flex-shrink:0;width:390px;background:white;border:1px solid var(--sand);border-radius:3px;padding:38px;scroll-snap-align:start;transition:box-shadow .3s,transform .3s;}
+.pcc:hover{box-shadow:0 20px 56px rgba(24,19,15,.1);transform:translateY(-4px);}
+.pccnum{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:300;color:var(--sand);line-height:1;margin-bottom:18px;}
+.pcctitle{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:300;line-height:1.15;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em;}
+.pccsub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:18px;}
+.pccdesc{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;line-height:1.7;color:rgba(24,19,15,.55);margin-bottom:24px;}
+.pccstack{display:flex;flex-wrap:wrap;gap:5px;}
+.pcchip{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.07em;background:var(--warm-mid);border:1px solid var(--sand);padding:3px 7px;border-radius:2px;color:rgba(24,19,15,.42);}
+
+/* ══════════════════════
+   SKILLS A — INVERT GRID
+   ══════════════════════ */
+#skillsA{padding:120px 64px;background:var(--cream);}
+.sah{margin-bottom:64px;}
+.sagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.sacell{padding:34px 30px;background:white;border:1px solid var(--sand);position:relative;overflow:hidden;transition:background .3s;cursor:default;}
+.sacell:hover{background:var(--ink);}
+.sacell:hover .sacat{color:var(--rust);}
+.sacell:hover .saname{color:var(--cream);}
+.sacell:hover .sabar-fill{background:var(--rust);}
+.sacell:hover .saitems span{color:rgba(247,242,234,.45);}
+.sacat{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--rust);margin-bottom:18px;transition:color .3s;}
+.saname{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--ink);margin-bottom:14px;transition:color .3s;}
+.sabar{height:2px;background:var(--sand);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+.sabar-fill{height:100%;background:var(--rust);border-radius:2px;transition:background .3s;}
+.saitems{display:flex;flex-wrap:wrap;gap:4px;}
+.saitems span{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.05em;color:rgba(24,19,15,.38);transition:color .3s;}
+.saitems span::after{content:' ·';color:var(--sand);}
+.saitems span:last-child::after{content:'';}
+
+/* ══════════════════════
+   SKILLS B — MARQUEE
+   ══════════════════════ */
+#skillsB{padding:120px 0;background:var(--ink);overflow:hidden;}
+.sbh{padding:0 64px;margin-bottom:64px;}
+.smrow{display:flex;overflow:hidden;margin-bottom:14px;}
+.smrow:nth-child(even) .smin{animation-direction:reverse;}
+.smin{display:flex;animation:ticker 22s linear infinite;gap:10px;}
+.spill{flex-shrink:0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;padding:9px 18px;border-radius:100px;border:1px solid;white-space:nowrap;transition:background .2s,color .2s;cursor:default;}
+.spill.dim{color:rgba(247,242,234,.22);border-color:rgba(247,242,234,.08);}
+.spill.dim:hover{color:var(--cream);border-color:rgba(247,242,234,.38);}
+.spill.lit{color:var(--rust);border-color:rgba(191,74,43,.38);}
+.spill.lit:hover{background:var(--rust);color:var(--cream);border-color:var(--rust);}
+
+/* ══════════════════════
+   SKILLS C — LIST
+   ══════════════════════ */
+#skillsC{padding:120px 64px;background:var(--cream);}
+.sch{margin-bottom:64px;}
+.scrow{display:grid;grid-template-columns:200px 1fr;border-top:1px solid var(--sand);padding:26px 0;transition:background .22s;}
+.scrow:last-child{border-bottom:1px solid var(--sand);}
+.scrow:hover{background:rgba(24,19,15,.02);}
+.sccat{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);padding-top:2px;}
+.scitems{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
+.scitem{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(24,19,15,.52);transition:color .2s;cursor:default;}
+.scitem:hover{color:var(--rust);}
+.scsep{color:var(--sand);font-size:14px;}
+
+/* ══════════════════════
+   OPEN SOURCE
+   ══════════════════════ */
+#oss{padding:120px 64px;background:var(--ink);position:relative;overflow:hidden;}
+#oss::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(247,242,234,.022) 59px,rgba(247,242,234,.022) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(247,242,234,.022) 59px,rgba(247,242,234,.022) 60px);}
+.ossinn{position:relative;z-index:2;max-width:1080px;margin:0 auto;}
+.osshdr{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:end;margin-bottom:72px;padding-bottom:44px;border-bottom:1px solid rgba(247,242,234,.08);}
+.ossdesc{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;line-height:1.72;color:rgba(247,242,234,.48);align-self:end;}
+.ossdesc strong{color:var(--cream);font-weight:400;}
+.ossft{background:rgba(247,242,234,.04);border:1px solid rgba(247,242,234,.08);border-radius:4px;padding:38px;margin-bottom:24px;transition:border-color .3s,background .3s;}
+.ossft:hover{border-color:rgba(191,74,43,.32);background:rgba(191,74,43,.035);}
+.ossftop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+.ossrname{font-family:'DM Mono',monospace;font-size:14px;letter-spacing:.06em;color:var(--cream);}
+.ossrsub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-top:5px;}
+.ossstars{display:flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);}
+.ossstars svg{fill:var(--gold);stroke:none;}
+.ossbadge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);border:1px solid rgba(122,145,120,.32);padding:3px 10px;border-radius:100px;margin-top:8px;}
+.osstext{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;line-height:1.7;color:rgba(247,242,234,.48);margin-bottom:22px;}
+.osstext strong{color:var(--cream);font-weight:400;}
+.ossbulls{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px 44px;}
+.ossbulls li{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.04em;color:rgba(247,242,234,.32);display:flex;align-items:flex-start;gap:8px;line-height:1.6;}
+.ossbulls li::before{content:'→';color:var(--rust);flex-shrink:0;}
+.ossstats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:24px;}
+.osssc{background:rgba(247,242,234,.04);border:1px solid rgba(247,242,234,.06);padding:30px 26px;text-align:center;transition:background .3s;}
+.osssc:hover{background:rgba(247,242,234,.07);}
+.ossnum{font-family:'Cormorant Garamond',serif;font-size:50px;font-weight:300;color:var(--rust);line-height:1;margin-bottom:7px;}
+.ossnum em{font-style:italic;}
+.osslbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,242,234,.28);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+<div id="spotlight"></div>
+
+<!-- NAV -->
+<nav id="nav-bar">
+  <a href="#" class="nlogo">D<em>.</em></a>
+  <div class="nlinks">
+    <a href="#heroA" class="nlink">Hero A</a>
+    <a href="#heroB" class="nlink">Hero B</a>
+    <a href="#heroC" class="nlink">Hero C</a>
+    <a href="#projA" class="nlink">Proj A</a>
+    <a href="#projB" class="nlink">Proj B</a>
+    <a href="#projC" class="nlink">Proj C</a>
+    <a href="#skillsA" class="nlink">Skills</a>
+    <a href="#oss" class="nlink">OSS</a>
+  </div>
+  <a href="mailto:deepam@example.com" class="ncta">Let's build →</a>
+</nav>
+
+<!-- ═══ HERO A ═══ -->
+<div class="sdiv" style="margin-top:72px;padding-top:80px;"><strong>HERO A</strong> — V1 remix · Light · Ruled lines · Terminal inset · Ghost letter</div>
+<section id="heroA">
+  <div class="gnum">A</div>
+  <div class="mcol">
+    <div class="eyerow">
+      <div class="lbadge"><div class="ldot"></div>Open to the right role</div>
+      <div style="width:30px;height:1px;background:rgba(24,19,15,.14);"></div>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(24,19,15,.28);">AI Eng · SG / Remote</span>
+    </div>
+    <h1>Most engineers<br>write <em>code.</em><br>I write<br><span class="gw">systems.</span></h1>
+    <p class="sub">Four months. One 4-person startup. <strong>Three production AI systems shipped</strong> — no seniors, no safety net, no second chances on infra that broke at 3am.</p>
+    <div class="acts">
+      <a href="#projA" class="btn-ink">See the systems <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#oss" class="btn-ghost-lk">or just email me →</a>
+    </div>
+  </div>
+  <div class="tcol">
+    <div class="mterm">
+      <div class="mtbar">
+        <div class="tdot" style="background:#FF5F57"></div>
+        <div class="tdot" style="background:#FEBC2E"></div>
+        <div class="tdot" style="background:#28C840"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(232,221,208,.18);margin-left:10px;letter-spacing:.06em;">deepam · reality-check</span>
+      </div>
+      <div class="mtbody" id="termA"></div>
+    </div>
+  </div>
+  <div class="scroll-a"><div class="sline"></div>Scroll</div>
+</section>
+
+<!-- TICKER -->
+<div class="tsec">
+  <div class="ttrack">
+    <div class="titem"><span class="tword">LangGraph</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Kubernetes / EKS</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Production RAG</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Google ADK</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Terraform</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Go · Python · TypeScript</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Qdrant + BM25 + Cohere</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Multi-Agent Systems</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">FastAPI · React</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">2.8k★ OSS Contributor</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">LangGraph</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Kubernetes / EKS</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Production RAG</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Google ADK</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Terraform</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Go · Python · TypeScript</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Qdrant + BM25 + Cohere</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">Multi-Agent Systems</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">FastAPI · React</span><span class="tsep">·</span></div>
+    <div class="titem"><span class="tword">2.8k★ OSS Contributor</span><span class="tsep">·</span></div>
+  </div>
+</div>
+
+<!-- ═══ HERO B ═══ -->
+<div class="sdiv"><strong>HERO B</strong> — Full dark · Massive Cormorant serif · Stats baseline row</div>
+<section id="heroB">
+  <div class="gbg"></div>
+  <div class="eye"><div class="bldot"></div><span class="etxt">Deepam — AI Engineer · Singapore / Remote · Open to offers</span></div>
+  <h1>I build<br>AI that<br><span class="gw">actually</span><br><em>runs.</em></h1>
+  <div class="brow">
+    <div class="bc"><div class="bnum">3</div><div class="blbl">Production systems<br>shipped in 4 months</div></div>
+    <div class="bc"><div class="bnum">0</div><div class="blbl">Senior engineers<br>above me. Ever.</div></div>
+    <div class="bc"><div class="bnum">20<em style="font-size:28px;font-style:italic;">+</em></div><div class="blbl">Merged OSS PRs<br>across real codebases</div></div>
+  </div>
+  <div class="bacts">
+    <a href="#projB" class="btn-cream">See the work <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    <a href="mailto:deepam@example.com" class="btn-ghost-dk">deepam@example.com →</a>
+  </div>
+</section>
+
+<!-- ═══ HERO C ═══ -->
+<div class="sdiv"><strong>HERO C</strong> — Editorial asymmetric · Vertical ink rail · Two-col bottom split</div>
+<section id="heroC">
+  <div class="rail"><span class="rtxt">AI ENGINEER · BUILDER · 2026</span></div>
+  <div class="cmain">
+    <div class="cey"><div class="cldot"></div><span class="cltxt">Available now</span><div style="width:24px;height:1px;background:var(--sand);"></div><span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(24,19,15,.3);">SG / Remote</span></div>
+    <h1>Don't hire<br>a developer.<br>Hire someone<br>who <em>ships.</em></h1>
+    <div class="cbody">
+      <p class="cdesc">Four months. A 4-person team building AI for one of Southeast Asia's largest telcos. <strong>I was the only AI engineer.</strong> The systems I built are running in production right now.</p>
+      <div class="cstats">
+        <div class="csrow"><div class="csnum">3</div><div class="cslbl">Production AI<br>systems shipped</div></div>
+        <div class="csrow"><div class="csnum">20<em style="font-size:22px">+</em></div><div class="cslbl">Merged OSS PRs<br>across real repos</div></div>
+        <div class="csrow"><div class="csnum">Top <em style="font-size:22px">10</em></div><div class="cslbl">Contributor, docker-agent<br>2.8k★ project</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJ A ═══ -->
+<div class="sdiv"><strong>PROJECTS A</strong> — Accordion rows · Light bg · Click to expand with stack</div>
+<section id="projA">
+  <div class="ph reveal">
+    <div class="slabel">What I've shipped</div>
+    <h2 class="stitle-lk">Three systems.<br>Four months. <em>All production.</em></h2>
+  </div>
+  <div class="arow reveal">
+    <button class="atrig" onclick="toggleAcc(0)">
+      <span class="anum">01</span><span class="aname">SWARM — Agent Orchestration</span>
+      <div class="atags"><span class="atag">Multi-Agent</span><span class="atag">EKS</span></div>
+      <div class="aico" id="ai0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </button>
+    <div class="abody" id="ab0">
+      <div class="abinn">
+        <div><p class="adesc">Multi-agent isn't a buzzword when each agent runs in its own Kubernetes pod, spawned on demand, wired to live Jira queues and real telecom alarm systems. I built the whole thing solo — Terraform, orchestration, integrations, and agent logic. Three templates shipped and running.</p>
+        <ul class="abulls"><li>Ticket-to-pod pipeline: Jira webhook → spawn → classify → AgentMail escalation</li><li>L1/L2 triage with alarm correlator and change management lookups</li><li>Svix signature verification + atomic SQL state transitions on all reply handling</li><li>Thread-ID routing keeps agents contextual across multi-turn conversations</li></ul></div>
+        <div><div class="aslbl">Stack</div><div class="achips"><span class="achip">Google ADK</span><span class="achip">LangGraph</span><span class="achip">Kubernetes</span><span class="achip">Terraform</span><span class="achip">LiteLLM</span><span class="achip">AgentMail</span><span class="achip">Jira</span><span class="achip">Python</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="arow reveal" style="transition-delay:.1s">
+    <button class="atrig" onclick="toggleAcc(1)">
+      <span class="anum">02</span><span class="aname">AutoCLM — WhatsApp at Scale</span>
+      <div class="atags"><span class="atag">AI Product</span><span class="atag">100k+</span></div>
+      <div class="aico" id="ai1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </button>
+    <div class="abody" id="ab1">
+      <div class="abinn">
+        <div><p class="adesc">Telcos fire the same SMS at 100,000 people and call it personalisation. AutoCLM replaces that with continuous 1:1 AI conversations — each customer on their own arc, planned by a Journey Agent, executed by Stella via WhatsApp. I designed the architecture and shipped the full-stack demo.</p>
+        <ul class="abulls"><li>Blueprint layer: human strategy, tone guardrails, offer limits per segment</li><li>Journey Agent runs continuously — per-customer engagement arc across 100k+ base</li><li>Stella executes 1:1 WhatsApp dialogues without hallucinating plan prices</li><li>Team dashboard: Morning Briefing, Cohort Live View, Simulation Sandbox</li></ul></div>
+        <div><div class="aslbl">Stack</div><div class="achips"><span class="achip">React</span><span class="achip">FastAPI</span><span class="achip">LangGraph</span><span class="achip">WhatsApp API</span><span class="achip">Postgres</span><span class="achip">Python</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="arow reveal" style="transition-delay:.2s">
+    <button class="atrig" onclick="toggleAcc(2)">
+      <span class="anum">03</span><span class="aname">Information Repository v2 — RAG</span>
+      <div class="atags"><span class="atag">AI Infra</span><span class="atag">Hybrid Search</span></div>
+      <div class="aico" id="ai2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </button>
+    <div class="abody" id="ab2">
+      <div class="abinn">
+        <div><p class="adesc">"Close enough" doesn't cut it when an AI quotes plan prices to real customers. I scrapped v1 and rebuilt with four content zones, hybrid retrieval with RRF fusion, Cohere reranking, and LLM-generated chunk labels — so what the model retrieves is actually what it needs.</p>
+        <ul class="abulls"><li>Four zones: images, URLs, structured knowledge, unstructured FAQs</li><li>Dense + BM25 sparse retrieval fused with Reciprocal Rank Fusion</li><li>Cohere rerank-v3.5 via OpenRouter as final relevance pass</li><li>Soft deletes, approval loops, full audit trail — because this is production</li></ul></div>
+        <div><div class="aslbl">Stack</div><div class="achips"><span class="achip">Qdrant</span><span class="achip">Postgres</span><span class="achip">FastAPI</span><span class="achip">MinIO</span><span class="achip">Cohere rerank-v3.5</span><span class="achip">BM25+RRF</span><span class="achip">OpenRouter</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJ B ═══ -->
+<div class="sdiv"><strong>PROJECTS B</strong> — Dark editorial rows · Magazine newspaper feel</div>
+<section id="projB">
+  <div class="pbh reveal">
+    <div class="slabel">Selected work</div>
+    <h2 class="stitle-dk">Three systems.<br>Four months. <em>Zero seniors.</em></h2>
+  </div>
+  <div class="prow reveal"><div class="prnum">01</div>
+    <div class="prl"><div class="prtitle">SWARM — Agent Orchestration for Telco</div><div class="prsub">AWS EKS · ap-southeast-1 · Production</div><div class="prtags"><span class="prtag">Multi-Agent</span><span class="prtag">Kubernetes</span><span class="prtag">Google ADK</span></div></div>
+    <div class="prr"><p class="prdesc">Most "multi-agent" projects are two LLM calls in a trenchcoat. SWARM is different — each agent runs in its own Kubernetes sandbox pod, wired to real enterprise systems. Infra, orchestration, integrations, agent logic. All me.</p><div class="prstack"><span class="prchip">LangGraph</span><span class="prchip">Terraform</span><span class="prchip">LiteLLM</span><span class="prchip">AgentMail</span><span class="prchip">Python</span></div></div>
+  </div>
+  <div class="prow reveal" style="transition-delay:.1s"><div class="prnum">02</div>
+    <div class="prl"><div class="prtitle">AutoCLM — Conversational Campaign Engine</div><div class="prsub">Singtel · 100k+ customers · Full-stack</div><div class="prtags"><span class="prtag">AI Product</span><span class="prtag">WhatsApp</span><span class="prtag">React</span></div></div>
+    <div class="prr"><p class="prdesc">Telcos send the same SMS to 100,000 people and call it personalisation. AutoCLM replaces that with continuous 1:1 AI conversations — planned by a Journey Agent, executed by Stella.</p><div class="prstack"><span class="prchip">LangGraph</span><span class="prchip">FastAPI</span><span class="prchip">WhatsApp API</span><span class="prchip">Postgres</span></div></div>
+  </div>
+  <div class="prow reveal" style="transition-delay:.2s"><div class="prnum">03</div>
+    <div class="prl"><div class="prtitle">Information Repository — Production RAG</div><div class="prsub">Qdrant · Hybrid Search · Zero hallucination</div><div class="prtags"><span class="prtag">AI Infra</span><span class="prtag">BM25+RRF</span><span class="prtag">Cohere</span></div></div>
+    <div class="prr"><p class="prdesc">"Close enough" doesn't work when an AI quotes plan prices to real customers. Scrapped v1, rebuilt with hybrid retrieval, Cohere reranking, and LLM-generated chunk labels.</p><div class="prstack"><span class="prchip">Qdrant</span><span class="prchip">FastAPI</span><span class="prchip">MinIO</span><span class="prchip">OpenRouter</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ PROJ C ═══ -->
+<div class="sdiv"><strong>PROJECTS C</strong> — Horizontal drag-scroll cards · Warm bg</div>
+<section id="projC">
+  <div class="pch reveal">
+    <div class="slabel">What I've shipped</div>
+    <h2 class="stitle-lk">Three systems.<br><em>All production.</em></h2>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(24,19,15,.28);margin-top:14px;">← drag to browse →</div>
+  </div>
+  <div class="pcscroll" id="pcscroll">
+    <div class="pcc"><div class="pccnum">01</div><div class="pcctitle">SWARM — Agent Orchestration</div><div class="pccsub">AWS EKS · Google ADK · Production</div><p class="pccdesc">Each agent in its own Kubernetes pod. Real enterprise integrations — Jira, AgentMail, telecom alarm systems — all wired, not faked. Built and shipped solo.</p><div class="pccstack"><span class="pcchip">LangGraph</span><span class="pcchip">K8s/EKS</span><span class="pcchip">Terraform</span><span class="pcchip">LiteLLM</span><span class="pcchip">Google ADK</span></div></div>
+    <div class="pcc"><div class="pccnum">02</div><div class="pcctitle">AutoCLM — WhatsApp at Scale</div><div class="pccsub">Singtel · 100k+ customers</div><p class="pccdesc">Replaced batch SMS campaigns with continuous 1:1 AI conversations. Blueprint strategy layer, Journey Agent planner, Stella conversational executor. Full React dashboard included.</p><div class="pccstack"><span class="pcchip">React</span><span class="pcchip">FastAPI</span><span class="pcchip">LangGraph</span><span class="pcchip">WhatsApp API</span></div></div>
+    <div class="pcc"><div class="pccnum">03</div><div class="pcctitle">Information Repository v2</div><div class="pccsub">Qdrant · BM25+RRF · Cohere</div><p class="pccdesc">Scrapped v1 and rebuilt. Four content zones, hybrid search, Cohere reranking, LLM-generated chunk labels. Zero hallucination on plan prices and device specs.</p><div class="pccstack"><span class="pcchip">Qdrant</span><span class="pcchip">Postgres</span><span class="pcchip">MinIO</span><span class="pcchip">Cohere</span></div></div>
+    <div class="pcc" style="border-style:dashed;background:transparent;"><div class="pccnum" style="color:var(--sand);">+</div><div class="pcctitle" style="color:rgba(24,19,15,.38);">Also worth knowing</div><div class="pccsub">Personal projects</div><p class="pccdesc" style="color:rgba(24,19,15,.32);">Go gRPC/GraphQL microservices · Insurance RAG · WebRTC real-time object detection · Micro ADK framework · Flash-sale distributed reservation engine</p></div>
+  </div>
+</section>
+
+<!-- ═══ SKILLS A ═══ -->
+<div class="sdiv"><strong>SKILLS A</strong> — Hover-invert grid · Light bg · Cells flip dark on hover</div>
+<section id="skillsA">
+  <div class="sah reveal"><div class="slabel">Capabilities</div><h2 class="stitle-lk">What I reach<br>for in <em>production</em></h2></div>
+  <div class="sagrid reveal">
+    <div class="sacell"><div class="sacat">Languages</div><div class="saname">Go · Python · TS</div><div class="sabar"><div class="sabar-fill" style="width:92%"></div></div><div class="saitems"><span>Go</span><span>Python</span><span>TypeScript</span><span>Java</span></div></div>
+    <div class="sacell"><div class="sacat">AI / Agents</div><div class="saname">LangGraph · ADK</div><div class="sabar"><div class="sabar-fill" style="width:96%"></div></div><div class="saitems"><span>LangGraph</span><span>Google ADK</span><span>OpenRouter</span><span>Cohere</span><span>LiteLLM</span></div></div>
+    <div class="sacell"><div class="sacat">Infra</div><div class="saname">K8s · EKS · Terraform</div><div class="sabar"><div class="sabar-fill" style="width:88%"></div></div><div class="saitems"><span>Kubernetes</span><span>EKS</span><span>Terraform</span><span>Docker</span><span>AWS</span></div></div>
+    <div class="sacell"><div class="sacat">Data</div><div class="saname">Qdrant · Postgres</div><div class="sabar"><div class="sabar-fill" style="width:85%"></div></div><div class="saitems"><span>Qdrant</span><span>Postgres</span><span>MinIO</span><span>BM25/RRF</span></div></div>
+    <div class="sacell"><div class="sacat">Frontend</div><div class="saname">React · FastAPI</div><div class="sabar"><div class="sabar-fill" style="width:80%"></div></div><div class="saitems"><span>React</span><span>FastAPI</span><span>WebRTC</span><span>gRPC</span><span>GraphQL</span></div></div>
+    <div class="sacell"><div class="sacat">Integrations</div><div class="saname">Jira · WA · Svix</div><div class="sabar"><div class="sabar-fill" style="width:93%"></div></div><div class="saitems"><span>Jira</span><span>WhatsApp API</span><span>AgentMail</span><span>Svix</span><span>Outlook</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ SKILLS B ═══ -->
+<div class="sdiv"><strong>SKILLS B</strong> — Marquee pill cloud · Dark bg · Pause on hover</div>
+<section id="skillsB">
+  <div class="sbh reveal"><div class="slabel">Stack</div><h2 class="stitle-dk">Everything I've<br>shipped <em>with</em></h2></div>
+  <div class="smrow"><div class="smin"><span class="spill lit">LangGraph</span><span class="spill dim">Google ADK</span><span class="spill lit">Kubernetes</span><span class="spill dim">Terraform</span><span class="spill lit">Go</span><span class="spill dim">Python</span><span class="spill lit">TypeScript</span><span class="spill dim">FastAPI</span><span class="spill lit">LangGraph</span><span class="spill dim">Google ADK</span><span class="spill lit">Kubernetes</span><span class="spill dim">Terraform</span><span class="spill lit">Go</span><span class="spill dim">Python</span><span class="spill lit">TypeScript</span><span class="spill dim">FastAPI</span></div></div>
+  <div class="smrow"><div class="smin"><span class="spill dim">Qdrant</span><span class="spill lit">BM25+RRF</span><span class="spill dim">Cohere Rerank</span><span class="spill lit">OpenRouter</span><span class="spill dim">LiteLLM</span><span class="spill lit">AWS EKS</span><span class="spill dim">MinIO</span><span class="spill lit">Postgres</span><span class="spill dim">Qdrant</span><span class="spill lit">BM25+RRF</span><span class="spill dim">Cohere Rerank</span><span class="spill lit">OpenRouter</span><span class="spill dim">LiteLLM</span><span class="spill lit">AWS EKS</span><span class="spill dim">MinIO</span><span class="spill lit">Postgres</span></div></div>
+  <div class="smrow"><div class="smin"><span class="spill lit">React</span><span class="spill dim">gRPC</span><span class="spill lit">GraphQL</span><span class="spill dim">WebRTC</span><span class="spill lit">Jira Webhooks</span><span class="spill dim">Svix</span><span class="spill lit">AgentMail</span><span class="spill dim">WhatsApp API</span><span class="spill lit">React</span><span class="spill dim">gRPC</span><span class="spill lit">GraphQL</span><span class="spill dim">WebRTC</span><span class="spill lit">Jira Webhooks</span><span class="spill dim">Svix</span><span class="spill lit">AgentMail</span><span class="spill dim">WhatsApp API</span></div></div>
+</section>
+
+<!-- ═══ SKILLS C ═══ -->
+<div class="sdiv"><strong>SKILLS C</strong> — Chapter list · Light bg · Clean inline hover</div>
+<section id="skillsC">
+  <div class="sch reveal"><div class="slabel">Stack</div><h2 class="stitle-lk">The tools I<br>actually <em>use</em></h2></div>
+  <div class="reveal">
+    <div class="scrow"><div class="sccat">Languages</div><div class="scitems"><span class="scitem">Go</span><span class="scsep">·</span><span class="scitem">Python</span><span class="scsep">·</span><span class="scitem">TypeScript</span><span class="scsep">·</span><span class="scitem">Java</span></div></div>
+    <div class="scrow"><div class="sccat">AI / Agents</div><div class="scitems"><span class="scitem">LangGraph</span><span class="scsep">·</span><span class="scitem">Google ADK</span><span class="scsep">·</span><span class="scitem">LiteLLM</span><span class="scsep">·</span><span class="scitem">Cohere Rerank</span><span class="scsep">·</span><span class="scitem">OpenRouter</span></div></div>
+    <div class="scrow"><div class="sccat">Infrastructure</div><div class="scitems"><span class="scitem">Kubernetes</span><span class="scsep">·</span><span class="scitem">AWS EKS</span><span class="scsep">·</span><span class="scitem">Terraform</span><span class="scsep">·</span><span class="scitem">Docker</span></div></div>
+    <div class="scrow"><div class="sccat">Data</div><div class="scitems"><span class="scitem">Qdrant</span><span class="scsep">·</span><span class="scitem">Postgres</span><span class="scsep">·</span><span class="scitem">MinIO</span><span class="scsep">·</span><span class="scitem">BM25 / RRF</span></div></div>
+    <div class="scrow"><div class="sccat">Frontend</div><div class="scitems"><span class="scitem">React</span><span class="scsep">·</span><span class="scitem">FastAPI</span><span class="scsep">·</span><span class="scitem">gRPC</span><span class="scsep">·</span><span class="scitem">GraphQL</span><span class="scsep">·</span><span class="scitem">WebRTC</span></div></div>
+    <div class="scrow"><div class="sccat">Integrations</div><div class="scitems"><span class="scitem">Jira Webhooks</span><span class="scsep">·</span><span class="scitem">WhatsApp API</span><span class="scsep">·</span><span class="scitem">AgentMail</span><span class="scsep">·</span><span class="scitem">Svix</span><span class="scsep">·</span><span class="scitem">Outlook</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ OSS ═══ -->
+<div class="sdiv"><strong>OPEN SOURCE</strong> — Dark · docker-agent feature card + 3-stat row</div>
+<section id="oss">
+  <div class="ossinn">
+    <div class="osshdr reveal">
+      <div><div class="slabel">Open Source</div><h2 class="stitle-dk">I contribute to<br>things that <em>matter.</em></h2></div>
+      <p class="ossdesc">Twenty-plus merged PRs across real codebases. Not typo fixes — <strong>features, critical bug resolutions, and system reliability improvements</strong> on projects other engineers depend on daily.</p>
+    </div>
+    <div class="ossft reveal">
+      <div class="ossftop">
+        <div>
+          <div class="ossrname">docker/docker-agent</div>
+          <div class="ossrsub">Top 10 contributor</div>
+          <div class="ossbadge"><div style="width:6px;height:6px;border-radius:50%;background:var(--sage);"></div>Active contributor</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="ossstars"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>2.8k stars</div>
+        </div>
+      </div>
+      <p class="osstext">This isn't a hobby project forked on a Sunday. Docker-agent is a <strong>real-world codebase</strong> with CI pipelines, Linux-based debugging, and code reviews from engineers around the world. I'm among the top 10 contributors — not by volume of trivial fixes, but by impact: meaningful features, critical bug resolutions, and documentation that actually helps people use the system.</p>
+      <ul class="ossbulls">
+        <li>Meaningful feature contributions — not just one-liners</li>
+        <li>Critical bug fixes improving overall system reliability</li>
+        <li>Comfortable navigating large, real-world codebases</li>
+        <li>CI pipeline experience and Linux-based debugging</li>
+        <li>Collaborative code reviews with a global engineering team</li>
+        <li>Documentation that makes systems understandable, not just usable</li>
+      </ul>
+    </div>
+    <div class="ossstats reveal">
+      <div class="osssc"><div class="ossnum">20<em>+</em></div><div class="osslbl">Merged pull requests<br>across open source repos</div></div>
+      <div class="osssc"><div class="ossnum">Top <em>10</em></div><div class="osslbl">Contributors on<br>docker-agent</div></div>
+      <div class="osssc"><div class="ossnum">2.8<em>k</em></div><div class="osslbl">GitHub stars on<br>primary contribution</div></div>
+    </div>
+  </div>
+</section>
+
+<div style="height:80px;background:var(--ink);"></div>
+
+<script>
+// CURSOR
+const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring'),spot=document.getElementById('spotlight');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  spot.style.setProperty('--mx',mx+'px');spot.style.setProperty('--my',my+'px');
+});
+function lr(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(lr);}
+lr();
+
+// NAV
+window.addEventListener('scroll',()=>document.getElementById('nav-bar').classList.toggle('scrolled',scrollY>60));
+
+// REVEAL
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// SMOOTH SCROLL
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});});
+
+// ACCORDION
+function toggleAcc(i){
+  const b=document.getElementById(`ab${i}`),ic=document.getElementById(`ai${i}`),isOpen=b.classList.contains('open');
+  [0,1,2].forEach(j=>{document.getElementById(`ab${j}`).classList.remove('open');document.getElementById(`ai${j}`).classList.remove('open');});
+  if(!isOpen){b.classList.add('open');ic.classList.add('open');}
+}
+
+// TERMINAL TYPEWRITER
+const tlines=[
+  {t:'p',v:'whoami'},{t:'o',v:'deepam — the engineer who ships, not demos'},
+  {t:'p',v:'cat shipped.log'},
+  {t:'s',v:'✓  SWARM: multi-agent orchestration on K8s/EKS'},
+  {t:'s',v:'✓  AutoCLM: WhatsApp AI for 100k+ customers'},
+  {t:'s',v:'✓  RAG backend: hybrid search, zero hallucination'},
+  {t:'p',v:'grep -r "senior-above-me" ./team/'},{t:'o',v:'(no matches found)'},
+  {t:'p',v:'docker-agent --contributions'},{t:'s',v:'Top 10 contributor · 2.8k★ · 20+ merged PRs'},
+  {t:'p',v:'echo $availability'},{t:'o',v:'open · SG/remote · immediate · early-stage only'},
+  {t:'cur',v:''}
+];
+const tel=document.getElementById('termA');
+let li=0,ci=0,ce=null;
+function typeA(){
+  if(li>=tlines.length)return;
+  const line=tlines[li];
+  if(!ce){
+    const row=document.createElement('div');row.className='tr';
+    if(line.t==='cur'){const p=document.createElement('span');p.className='tp';p.textContent='$ ';const c=document.createElement('span');c.className='tcur';row.appendChild(p);row.appendChild(c);tel.appendChild(row);return;}
+    if(line.t==='p'){const p=document.createElement('span');p.className='tp';p.textContent='$ ';ce=document.createElement('span');ce.className='tc';row.appendChild(p);row.appendChild(ce);}
+    else{ce=document.createElement('div');ce.className=line.t==='s'?'ts':'to';row.appendChild(ce);}
+    tel.appendChild(row);
+  }
+  if(ci<line.v.length){ce.textContent+=line.v[ci++];setTimeout(typeA,line.t==='p'?50:15);}
+  else{li++;ci=0;ce=null;setTimeout(typeA,line.t==='p'?340:80);}
+}
+setTimeout(typeA,900);
+
+// DRAG SCROLL
+const ps=document.getElementById('pcscroll');
+let isDown=false,sx,sl;
+ps.addEventListener('mousedown',e=>{isDown=true;sx=e.pageX-ps.offsetLeft;sl=ps.scrollLeft;});
+ps.addEventListener('mouseleave',()=>isDown=false);
+ps.addEventListener('mouseup',()=>isDown=false);
+ps.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();ps.scrollLeft=sl-(e.pageX-ps.offsetLeft-sx);});
+</script>
+</body>
+</html>
